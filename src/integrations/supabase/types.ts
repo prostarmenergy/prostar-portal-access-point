@@ -28,15 +28,7 @@ export type Database = {
           id?: string
           name?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "categories_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       policies: {
         Row: {
@@ -77,41 +69,33 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "policies_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       profiles: {
         Row: {
           created_at: string | null
           employee_id: string
-          id: string
-          name: string
-          profile_pic: string | null
           role: string
         }
         Insert: {
           created_at?: string | null
           employee_id: string
-          id: string
-          name: string
-          profile_pic?: string | null
           role: string
         }
         Update: {
           created_at?: string | null
           employee_id?: string
-          id?: string
-          name?: string
-          profile_pic?: string | null
           role?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "user_credentials"
+            referencedColumns: ["employee_id"]
+          },
+        ]
       }
       sessions: {
         Row: {
@@ -143,14 +127,28 @@ export type Database = {
             referencedRelation: "policies"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "sessions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
+      }
+      user_credentials: {
+        Row: {
+          created_at: string | null
+          employee_id: string
+          name: string
+          password: string
+        }
+        Insert: {
+          created_at?: string | null
+          employee_id: string
+          name: string
+          password: string
+        }
+        Update: {
+          created_at?: string | null
+          employee_id?: string
+          name?: string
+          password?: string
+        }
+        Relationships: []
       }
     }
     Views: {
