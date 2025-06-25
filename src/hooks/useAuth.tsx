@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 interface Profile {
   employee_id: string;
   role: string;
+  name: string;
+  profile_pic?: string | null;
   created_at: string | null;
 }
 
@@ -29,7 +31,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          employee_id,
+          role,
+          created_at,
+          user_credentials!inner(name)
+        `)
         .eq('id', userId)
         .maybeSingle();
 
@@ -38,7 +45,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      setProfile(data);
+      if (data) {
+        const profileData: Profile = {
+          employee_id: data.employee_id,
+          role: data.role,
+          name: data.user_credentials?.name || 'Unknown',
+          profile_pic: null, // We'll add this later when implementing profile pictures
+          created_at: data.created_at
+        };
+        setProfile(profileData);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
