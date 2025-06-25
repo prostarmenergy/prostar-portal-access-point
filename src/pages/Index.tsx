@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import EnterpriseHeader from '@/components/EnterpriseHeader';
 import LoginTabs from '@/components/LoginTabs';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const handleLogin = async (data: { employeeId: string; password: string }, userType: 'employee' | 'admin') => {
@@ -41,6 +43,15 @@ const Index = () => {
 
           {/* Login tabs */}
           <LoginTabs onLogin={handleLogin} />
+
+          {/* Demo Dashboard Link */}
+          <div className="text-center mt-6">
+            <Link to="/dashboard">
+              <Button variant="outline" className="w-full border-enterprise-primary text-enterprise-primary hover:bg-enterprise-primary hover:text-white">
+                View Demo Dashboard
+              </Button>
+            </Link>
+          </div>
 
           {/* Footer note */}
           <div className="text-center mt-8">
