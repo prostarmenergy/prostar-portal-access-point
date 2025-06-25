@@ -4,11 +4,9 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Profile {
-  id: string;
   employee_id: string;
-  name: string;
   role: string;
-  profile_pic?: string;
+  created_at: string | null;
 }
 
 interface AuthContextType {
