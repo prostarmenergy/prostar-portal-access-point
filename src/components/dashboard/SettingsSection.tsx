@@ -1,8 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings, Lock, User, Upload, LogOut } from 'lucide-react';
+import { Settings, Lock, User, Upload } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import ChangePasswordDialog from './ChangePasswordDialog';
 
 interface Employee {
   name: string;
@@ -15,25 +19,46 @@ interface SettingsSectionProps {
 }
 
 const SettingsSection: React.FC<SettingsSectionProps> = ({ employee }) => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+
   const handleChangePassword = () => {
-    console.log('Change password clicked');
-    // TODO: Navigate to change password page
+    setShowChangePassword(true);
   };
 
   const handleUpdateProfilePicture = () => {
-    console.log('Update profile picture clicked');
     // TODO: Open file upload dialog
+    toast({
+      title: "Feature Coming Soon",
+      description: "Profile picture upload will be available soon.",
+    });
   };
 
   const handleEditDetails = () => {
-    console.log('Edit details clicked');
     // TODO: Navigate to profile edit page
+    toast({
+      title: "Feature Coming Soon",
+      description: "Profile editing will be available soon.",
+    });
   };
 
-  const handleLogout = () => {
-    console.log('Logout clicked');
-    // TODO: Implement logout functionality
-    alert('Logout functionality will be implemented');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of your account.",
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const settingsOptions = [
@@ -57,58 +82,77 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({ employee }) => {
       description: 'Update your profile information',
       action: handleEditDetails,
       variant: 'outline' as const
-    },
-    {
-      icon: LogOut,
-      label: 'Logout',
-      description: 'Sign out of your account',
-      action: handleLogout,
-      variant: 'destructive' as const
     }
   ];
 
   return (
-    <Card className="enterprise-shadow h-fit">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-enterprise-primary">
-          <Settings className="h-5 w-5" />
-          Account Settings
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {settingsOptions.map((option, index) => (
+    <>
+      <Card className="enterprise-shadow h-fit">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-enterprise-primary">
+            <Settings className="h-5 w-5" />
+            Account Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {settingsOptions.map((option, index) => (
+              <Button
+                key={index}
+                variant={option.variant}
+                className="w-full justify-start h-auto p-4 text-left"
+                onClick={option.action}
+              >
+                <div className="flex items-start gap-3">
+                  <option.icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-sm mb-1">
+                      {option.label}
+                    </div>
+                    <div className="text-xs opacity-70">
+                      {option.description}
+                    </div>
+                  </div>
+                </div>
+              </Button>
+            ))}
+            
+            {/* Logout button separately */}
             <Button
-              key={index}
-              variant={option.variant}
+              variant="destructive"
               className="w-full justify-start h-auto p-4 text-left"
-              onClick={option.action}
+              onClick={handleLogout}
             >
               <div className="flex items-start gap-3">
-                <option.icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <Settings className="h-5 w-5 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <div className="font-semibold text-sm mb-1">
-                    {option.label}
+                    Logout
                   </div>
                   <div className="text-xs opacity-70">
-                    {option.description}
+                    Sign out of your account
                   </div>
                 </div>
               </div>
             </Button>
-          ))}
-        </div>
-        
-        {/* Quick Info */}
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <div className="text-xs text-gray-500 space-y-1">
-            <div>Employee ID: {employee.employeeId}</div>
-            <div>Portal Version: 1.0</div>
-            <div>Last Updated: {new Date().toLocaleDateString()}</div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+          
+          {/* Quick Info */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="text-xs text-gray-500 space-y-1">
+              <div>Employee ID: {employee.employeeId}</div>
+              <div>Portal Version: 1.0</div>
+              <div>Last Updated: {new Date().toLocaleDateString()}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <ChangePasswordDialog 
+        open={showChangePassword} 
+        onOpenChange={setShowChangePassword} 
+      />
+    </>
   );
 };
 

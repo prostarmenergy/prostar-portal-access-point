@@ -1,12 +1,14 @@
-
 import React, { useState } from 'react';
 import { Eye, EyeOff, User, Lock, Building } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface LoginFormData {
   employeeId: string;
@@ -25,6 +27,8 @@ const LoginTabs: React.FC<LoginTabsProps> = ({ onLogin }) => {
   const [employeeError, setEmployeeError] = useState('');
   const [adminError, setAdminError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleEmployeeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,18 +36,37 @@ const LoginTabs: React.FC<LoginTabsProps> = ({ onLogin }) => {
     setIsLoading(true);
 
     try {
-      // TODO: Integrate with Supabase Auth
-      // For now, simulate validation
       if (!employeeForm.employeeId || !employeeForm.password) {
         setEmployeeError('Please fill in all fields');
         return;
+      }
+
+      // Use employee ID as email (you might want to modify this based on your auth setup)
+      const email = `${employeeForm.employeeId}@company.com`;
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: employeeForm.password,
+      });
+
+      if (error) {
+        setEmployeeError('Invalid credentials. Please try again.');
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Login successful",
+          description: "Welcome to the enterprise portal!",
+        });
+        navigate('/dashboard');
       }
 
       if (onLogin) {
         await onLogin(employeeForm, 'employee');
       }
     } catch (error) {
-      setEmployeeError('Incorrect credentials. Please try again.');
+      setEmployeeError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -55,18 +78,37 @@ const LoginTabs: React.FC<LoginTabsProps> = ({ onLogin }) => {
     setIsLoading(true);
 
     try {
-      // TODO: Integrate with Supabase Auth
-      // For now, simulate validation
       if (!adminForm.employeeId || !adminForm.password) {
         setAdminError('Please fill in all fields');
         return;
+      }
+
+      // Use employee ID as email (you might want to modify this based on your auth setup)
+      const email = `${adminForm.employeeId}@company.com`;
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: adminForm.password,
+      });
+
+      if (error) {
+        setAdminError('Invalid credentials. Please try again.');
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Admin login successful",
+          description: "Welcome to the admin portal!",
+        });
+        navigate('/dashboard');
       }
 
       if (onLogin) {
         await onLogin(adminForm, 'admin');
       }
     } catch (error) {
-      setAdminError('Incorrect credentials. Please try again.');
+      setAdminError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }

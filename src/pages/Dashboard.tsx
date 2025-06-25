@@ -5,15 +5,25 @@ import WelcomeSection from '@/components/dashboard/WelcomeSection';
 import NewlyAddedPolicies from '@/components/dashboard/NewlyAddedPolicies';
 import PolicyList from '@/components/dashboard/PolicyList';
 import SettingsSection from '@/components/dashboard/SettingsSection';
+import { useAuth } from '@/hooks/useAuth';
 
 const Dashboard = () => {
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(true);
+  const { profile, loading } = useAuth();
 
-  // Mock employee data - in real app this would come from auth/database
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-enterprise-light via-white to-enterprise-light font-poppins flex items-center justify-center">
+        <div className="text-enterprise-primary">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  // Use profile data from Supabase or fallback to defaults
   const employeeData = {
-    name: "John Smith",
-    employeeId: "EMP001234",
-    profilePicture: null
+    name: profile?.name || "Employee",
+    employeeId: profile?.employee_id || "Loading...",
+    profilePicture: profile?.profile_pic || null
   };
 
   return (

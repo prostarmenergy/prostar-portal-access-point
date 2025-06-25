@@ -1,27 +1,32 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EnterpriseHeader from '@/components/EnterpriseHeader';
 import LoginTabs from '@/components/LoginTabs';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate]);
+
   const handleLogin = async (data: { employeeId: string; password: string }, userType: 'employee' | 'admin') => {
     console.log('Login attempt:', { userType, employeeId: data.employeeId });
-    
-    // TODO: Integrate with Supabase Auth
-    // This is where you would implement the Supabase authentication logic
-    // using Employee ID as the username instead of email
-    
-    // Example integration structure:
-    // const { data: authData, error } = await supabase.auth.signInWithPassword({
-    //   email: `${data.employeeId}@company.com`, // or use a custom auth function
-    //   password: data.password,
-    // });
-    
-    // For now, just log the attempt
-    alert(`Login attempt for ${userType}: ${data.employeeId}`);
+    // Login logic is now handled in LoginTabs component
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-enterprise-light via-white to-enterprise-light font-poppins flex items-center justify-center">
+        <div className="text-enterprise-primary">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-enterprise-light via-white to-enterprise-light font-poppins">
@@ -43,15 +48,6 @@ const Index = () => {
 
           {/* Login tabs */}
           <LoginTabs onLogin={handleLogin} />
-
-          {/* Demo Dashboard Link */}
-          <div className="text-center mt-6">
-            <Link to="/dashboard">
-              <Button variant="outline" className="w-full border-enterprise-primary text-enterprise-primary hover:bg-enterprise-primary hover:text-white">
-                View Demo Dashboard
-              </Button>
-            </Link>
-          </div>
 
           {/* Footer note */}
           <div className="text-center mt-8">
