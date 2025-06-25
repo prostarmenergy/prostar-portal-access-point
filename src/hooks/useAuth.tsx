@@ -29,31 +29,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // First get the profile data
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select(`
-          employee_id,
-          role,
-          created_at,
-          user_credentials!inner(name)
-        `)
+        .select('employee_id, role, created_at')
         .eq('id', userId)
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
         return;
       }
 
-      if (data) {
-        const profileData: Profile = {
-          employee_id: data.employee_id,
-          role: data.role,
-          name: data.user_credentials?.name || 'Unknown',
+      if (profileData) {
+        // Then get the user credentials to get the name
+        const { data: credentialsData, error: credentialsError } = await supabase
+          .from('user_credentials')
+          .select('name')
+          .eq('employee_id', profileData.employee_id)
+          .maybeSingle();
+
+        if (credentialsError) {
+          console.error('Error fetching user credentials:', credentialsError);
+          return;
+        }
+
+        const profileWithName: Profile = {
+          employee_id: profileData.employee_id,
+          role: profileData.role,
+          name: credentialsData?.name || 'Unknown',
           profile_pic: null, // We'll add this later when implementing profile pictures
-          created_at: data.created_at
+          created_at: profileData.created_at
         };
-        setProfile(profileData);
+        
+        setProfile(profileWithName);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
